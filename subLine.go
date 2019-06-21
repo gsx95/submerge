@@ -3,7 +3,9 @@ package submerge
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type subLine struct {
@@ -41,7 +43,90 @@ func (s *subLine) toFormat() string {
 	return wr.String()
 }
 
-func adjustNumsForSortedSlice(lines []*subLine) {
+func (s *subLine) addDelay(hours, mins, secs, ms int64) {
+	// 00:03:35,954 --> 00:03:37,834
+	times := strings.Split(s.Time, " --> ")
+	hours1, mins1, secs1, ms1 := s.timeAsInts(times[0])
+	hours2, mins2, secs2, ms2 := s.timeAsInts(times[1])
+
+
+	hours1 += hours
+	hours2 += hours
+	mins1 += mins
+	mins2 += mins
+	secs1 += secs
+	secs2 += secs
+	ms1 += ms
+	ms2 += ms
+
+	milliSecs1 := ms1 + (secs1 * 1000) + (mins1 * 1000 * 60) + (hours1 * 1000 * 60 * 60)
+	milliSecs2 := ms2 + (secs2 * 1000) + (mins2 * 1000 * 60) + (hours2 * 1000 * 60 * 60)
+
+
+	t1 := time.Duration(milliSecs1 * 1000 * 1000)
+	t2 := time.Duration(milliSecs2 * 1000 * 1000)
+	s.setNewTimes(t1, t2)
+}
+
+func (s *subLine) setNewTimes(t1, t2 time.Duration) {
+
+	hour1 := t1 / time.Hour
+	t1 -= hour1 * time.Hour
+	min1 := t1 / time.Minute
+	t1 -= min1 * time.Minute
+	sec1 := t1 / time.Second
+	t1 -= sec1 * time.Second
+	ms1 := t1 / time.Millisecond
+
+
+	hour2 := t2 / time.Hour
+	t2 -= hour2 * time.Hour
+	min2 := t2 / time.Minute
+	t2 -= min2 * time.Minute
+	sec2 := t2 / time.Second
+	t2 -= sec2 * time.Second
+	ms2 := t2 / time.Millisecond
+	t2 -= ms2 * time.Millisecond
+
+
+	timeFormat := "%02d:%02d:%02d,%03d --> %02d:%02d:%02d,%03d"
+	s.Time = fmt.Sprintf(timeFormat, hour1, min1, sec1, ms1, hour2, min2, sec2, ms2)
+}
+
+func (s *subLine) timeAsInts(time string) (hours, mins, secs, ms int64) {
+	timeItems := strings.Split(time, ",")
+	hoursMinsSecs := strings.Split(timeItems[0], ":")
+	ms, err := strconv.ParseInt(timeItems[1], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	hours, err = strconv.ParseInt(hoursMinsSecs[0], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	mins, err = strconv.ParseInt(hoursMinsSecs[1], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	secs, err = strconv.ParseInt(hoursMinsSecs[2], 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+func addDelay(lines []*subLine, d *Delay) {
+	for _, line := range lines {
+		if line == nil {
+			continue
+		}
+		line.addDelay(d.Hours, d.Mins, d.Secs, d.Ms)
+	}
+}
+
+
+
+func adjustNums(lines []*subLine) {
 	for i, line := range lines {
 		if line == nil {
 			fmt.Printf("\n Missing: %d", i)

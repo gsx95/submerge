@@ -17,7 +17,9 @@ func parseSubFile(file *os.File) []*subLine {
 	for nextLine {
 		line, notEmpty := parseSubLine(sc)
 		nextLine = notEmpty
-		lines = append(lines, line)
+		if line != nil {
+			lines = append(lines, line)
+		}
 	}
 	return lines
 }
