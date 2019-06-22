@@ -43,6 +43,16 @@ func (s *subLine) toFormat() string {
 	return wr.String()
 }
 
+func (s *subLine) addColor(color string) {
+	if s.Text1 != "" {
+		s.Text1 = fmt.Sprintf(`<font color="%s">%s</font>`, color, s.Text1)
+	}
+
+	if s.Text2 != "" {
+		s.Text2 = fmt.Sprintf(`<font color="%s">%s</font>`, color, s.Text2)
+	}
+}
+
 func (s *subLine) addDelay(hours, mins, secs, ms int64) {
 	// 00:03:35,954 --> 00:03:37,834
 	times := strings.Split(s.Time, " --> ")
@@ -98,6 +108,7 @@ func (s *subLine) timeAsInts(time string) (hours, mins, secs, ms int64) {
 	hoursMinsSecs := strings.Split(timeItems[0], ":")
 	ms, err := strconv.ParseInt(timeItems[1], 10, 64)
 	if err != nil {
+
 		panic(err)
 	}
 	hours, err = strconv.ParseInt(hoursMinsSecs[0], 10, 64)
@@ -124,7 +135,14 @@ func addDelay(lines []*subLine, d *Delay) {
 	}
 }
 
-
+func addColor(lines []*subLine, color string) {
+	for _, line := range lines {
+		if line == nil {
+			continue
+		}
+		line.addColor(color)
+	}
+}
 
 func adjustNums(lines []*subLine) {
 	for i, line := range lines {

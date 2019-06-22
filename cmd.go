@@ -18,6 +18,7 @@ type Delay struct {
 type SubConfig struct {
 	FilePath string
 	*Delay
+	Color string
 }
 
 type Config struct {
@@ -38,9 +39,18 @@ func MergeSubs(conf Config) string {
 		addDelay(lines, conf.Sub1.Delay)
 	}
 
+	if conf.Sub1.Color != "" {
+		addColor(lines, conf.Sub1.Color)
+	}
+
 	if conf.Sub2.Delay != nil {
 		addDelay(lines2, conf.Sub2.Delay)
 	}
+
+	if conf.Sub2.Color != "" {
+		addColor(lines2, conf.Sub2.Color)
+	}
+
 
 	lines = append(lines, lines2...)
 	sort.Slice(lines, func(i, j int) bool {
