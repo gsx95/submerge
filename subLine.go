@@ -53,28 +53,25 @@ func (s *subLine) addColor(color string) {
 	}
 }
 
-func (s *subLine) addDelay(hours, mins, secs, ms int64) {
+func (s *subLine) addDelay(hours, mins, secs, ms int64, delayText bool) {
 	// 00:03:35,954 --> 00:03:37,834
 	times := strings.Split(s.Time, " --> ")
 	hours1, mins1, secs1, ms1 := s.timeAsInts(times[0])
 	hours2, mins2, secs2, ms2 := s.timeAsInts(times[1])
 
+	m1 := ms1 + (secs1 * 1000) + (mins1 * 1000 * 60) + (hours1 * 1000 * 60 * 60)
+	m2 := ms2 + (secs2 * 1000) + (mins2 * 1000 * 60) + (hours2 * 1000 * 60 * 60)
 
-	hours1 += hours
-	hours2 += hours
-	mins1 += mins
-	mins2 += mins
-	secs1 += secs
-	secs2 += secs
-	ms1 += ms
-	ms2 += ms
+	d1 := ms + (secs * 1000) + (mins * 1000 * 60) + (hours * 1000 * 60 * 60)
+	d2 := ms + (secs * 1000) + (mins * 1000 * 60) + (hours * 1000 * 60 * 60)
 
-	milliSecs1 := ms1 + (secs1 * 1000) + (mins1 * 1000 * 60) + (hours1 * 1000 * 60 * 60)
-	milliSecs2 := ms2 + (secs2 * 1000) + (mins2 * 1000 * 60) + (hours2 * 1000 * 60 * 60)
+	if !delayText {
+		d1 *= -1
+		d2 *= -1
+	}
 
-
-	t1 := time.Duration(milliSecs1 * 1000 * 1000)
-	t2 := time.Duration(milliSecs2 * 1000 * 1000)
+	t1 := time.Duration((m1 + d1) * 1000 * 1000)
+	t2 := time.Duration((m2 + d2) * 1000 * 1000)
 	s.setNewTimes(t1, t2)
 }
 
@@ -131,7 +128,7 @@ func addDelay(lines []*subLine, d *Delay) {
 		if line == nil {
 			continue
 		}
-		line.addDelay(d.Hours, d.Mins, d.Secs, d.Ms)
+		line.addDelay(d.Hours, d.Mins, d.Secs, d.Ms, d.TextTooEarly)
 	}
 }
 

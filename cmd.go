@@ -13,6 +13,7 @@ type Delay struct {
 	Mins int64
 	Secs int64
 	Ms int64
+	TextTooEarly bool
 }
 
 type SubConfig struct {
