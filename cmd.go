@@ -27,14 +27,26 @@ type Config struct {
 	Sub2 SubConfig
 }
 
-func MergeSubs(conf Config) string {
-	file1 := openFile(conf.Sub1.FilePath)
-	file2 := openFile(conf.Sub2.FilePath)
+func MergeSubs(conf Config) (string, error) {
+	file1, err := openFile(conf.Sub1.FilePath)
+	if err != nil {
+		return "", err
+	}
+	file2, err := openFile(conf.Sub2.FilePath)
+	if err != nil {
+		return "", err
+	}
 	defer closeFile(file1)
 	defer closeFile(file2)
 
-	lines := parseSubFile(file1)
-	lines2 := parseSubFile(file2)
+	lines, err := parseSubFile(file1)
+	if err != nil {
+		return "", err
+	}
+	lines2, err := parseSubFile(file2)
+	if err != nil {
+		return "", err
+	}
 
 	if conf.Sub1.Delay != nil {
 		addDelay(lines, conf.Sub1.Delay)
@@ -59,7 +71,7 @@ func MergeSubs(conf Config) string {
 	})
 
 	adjustNums(lines)
-	return writeLinesToString(lines)
+	return writeLinesToString(lines), nil
 }
 
 func writeLinesToString(lines []*subLine) string {

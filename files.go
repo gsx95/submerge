@@ -9,10 +9,10 @@ func closeFile(file *os.File) {
 	}
 }
 
-func openFile(name string) *os.File {
+func openFile(name string) (*os.File, error) {
 	file, err := os.Open(name)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return file
+	return file, nil
 }

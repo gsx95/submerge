@@ -56,6 +56,12 @@ func (s *subLine) addColor(color string) {
 func (s *subLine) addDelay(hours, mins, secs, ms int64, delayText bool) {
 	// 00:03:35,954 --> 00:03:37,834
 	times := strings.Split(s.Time, " --> ")
+	if len(times) < 2 {
+		fmt.Println(s.Time)
+		fmt.Println(s.Num)
+		fmt.Println(s.Text1)
+		fmt.Println(s.Text2)
+	}
 	hours1, mins1, secs1, ms1 := s.timeAsInts(times[0])
 	hours2, mins2, secs2, ms2 := s.timeAsInts(times[1])
 
@@ -69,9 +75,14 @@ func (s *subLine) addDelay(hours, mins, secs, ms int64, delayText bool) {
 		d1 *= -1
 		d2 *= -1
 	}
-
 	t1 := time.Duration((m1 + d1) * 1000 * 1000)
 	t2 := time.Duration((m2 + d2) * 1000 * 1000)
+	if t1.Nanoseconds() < 0 {
+		t1 = 0
+	}
+	if t2.Nanoseconds() < 0 {
+		t2 = 0
+	}
 	s.setNewTimes(t1, t2)
 }
 
